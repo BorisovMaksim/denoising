@@ -15,8 +15,9 @@ MODELS = {
 
 
 
-def evaluate_on_dataset(model_name, dataset_path, dataset_type, ideal):
-    model = MODELS[model_name]()
+def evaluate_on_dataset(model_name, dataset_path, dataset_type):
+    if model_name is not None:
+        model = MODELS[model_name]()
     parser = PARSERS[dataset_type]
     clean_wavs, noisy_wavs = parser(dataset_path)
 
@@ -25,10 +26,11 @@ def evaluate_on_dataset(model_name, dataset_path, dataset_type, ideal):
     for clean_path, noisy_path in tqdm(zip(clean_wavs, noisy_wavs), total=len(clean_wavs)):
         clean_wav = load_wav(clean_path)
         noisy_wav = load_wav(noisy_path)
-        denoised_wav = model(noisy_wav)
-        if ideal:
+
+        if model_name is None:
             scores = metrics.calculate(noisy_wav, clean_wav)
         else:
+            denoised_wav = model(noisy_wav)
             scores = metrics.calculate(noisy_wav, denoised_wav)
 
         mean_scores['PESQ'] += scores['PESQ']
@@ -49,14 +51,12 @@ if __name__ == '__main__':
                         choices=['valentini'])
     parser.add_argument('--model_name', type=str,
                         choices=['baseline'])
-    parser.add_argument('--ideal', type=bool, default=False,
-                        help="Evaluate metrics on testing data with ideal denoising")
+
 
     args = parser.parse_args()
 
     mean_scores = evaluate_on_dataset(model_name=args.model_name,
                         dataset_path=args.dataset_path,
-                        dataset_type=args.dataset_type,
-                        ideal=args.ideal)
+                        dataset_type=args.dataset_type)
     print(f"Metrics on {args.dataset_type} dataset with "
           f"{args.model_name if args.model_name is not None else 'ideal denoising'} = {mean_scores}")

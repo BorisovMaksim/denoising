@@ -4,7 +4,6 @@ import torchaudio
 
 
 class SpectralGating(torch.nn.Module):
-    """example: wav_noisy = '/media/public/datasets/denoising/DS_10283_2791/noisy_trainset_56spk_wav/p312_002.wav' """
     def __init__(self, rate=16000):
         super(SpectralGating, self).__init__()
         self.rate = rate
