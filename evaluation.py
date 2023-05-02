@@ -28,10 +28,10 @@ def evaluate_on_dataset(model_name, dataset_path, dataset_type):
         noisy_wav = load_wav(noisy_path)
 
         if model_name is None:
-            scores = metrics.calculate(noisy_wav, clean_wav)
+            scores = metrics.calculate(denoised=noisy_wav, clean=clean_wav)
         else:
             denoised_wav = model(noisy_wav)
-            scores = metrics.calculate(noisy_wav, denoised_wav)
+            scores = metrics.calculate(denoised=denoised_wav, clean=clean_wav)
 
         mean_scores['PESQ'] += scores['PESQ']
         mean_scores['STOI'] += scores['STOI']

@@ -16,7 +16,7 @@ class SpectralGating(torch.nn.Module):
         data, rate = torchaudio.load(wav_path)
         reduced_noise = torch.Tensor(nr.reduce_noise(y=data, sr=rate))
         torchaudio.save(out_path, reduced_noise, rate)
-        return reduced_noise
+        return out_path
 
     
     
