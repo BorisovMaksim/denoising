@@ -45,7 +45,7 @@ def evaluate_on_dataset(model_name, dataset_path, dataset_type):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(prog='Program to evaluate denoising')
     parser.add_argument('--dataset_path', type=str,
-                        default='/media/public/datasets/denoising/DS_10283_2791/',
+                        default='/media/public/dataset/denoising/DS_10283_2791/',
                         help='Path to dataset folder')
     parser.add_argument('--dataset_type', type=str, required=True,
                         choices=['valentini'])

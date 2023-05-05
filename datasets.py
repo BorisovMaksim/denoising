@@ -5,7 +5,7 @@ from utils import load_wav
 
 
 class Valentini(Dataset):
-    def __init__(self, dataset_path='/media/public/datasets/denoising/DS_10283_2791/', transform=None,
+    def __init__(self, dataset_path='/media/public/dataset/denoising/DS_10283_2791/', transform=None,
                  valid=False):
         clean_path = Path(dataset_path) / 'clean_trainset_56spk_wav'
         noisy_path = Path(dataset_path) / 'noisy_trainset_56spk_wav'
@@ -37,3 +37,10 @@ class Valentini(Dataset):
             torch.manual_seed(random_seed)
             clean_wav = self.transform(clean_wav)
         return noisy_wav, clean_wav
+
+
+DATASETS_POOL = {
+    'valentini': Valentini
+}
+
+

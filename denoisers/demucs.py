@@ -1,15 +1,19 @@
 import torch
 from torch.nn.functional import pad
 
+
+
 class Encoder(torch.nn.Module):
-    def __init__(self, in_channels, out_channels):
+    def __init__(self, in_channels, out_channels, cfg):
         super(Encoder, self).__init__()
 
         self.conv1 = torch.nn.Conv1d(in_channels=in_channels, out_channels=out_channels,
-                                     kernel_size=8, stride=2)
+                                     kernel_size=cfg['conv1']['kernel_size'],
+                                     stride=cfg['conv1']['stride'])
         self.relu1 = torch.nn.ReLU()
         self.conv2 = torch.nn.Conv1d(in_channels=out_channels, out_channels=2 * out_channels,
-                                     kernel_size=1, stride=1)
+                                     kernel_size=cfg['conv2']['kernel_size'],
+                                     stride=cfg['conv2']['stride'])
         self.glu = torch.nn.GLU(dim=-2)
 
     def forward(self, x):
@@ -21,14 +25,16 @@ class Encoder(torch.nn.Module):
 
 
 class Decoder(torch.nn.Module):
-    def __init__(self, in_channels, out_channels):
+    def __init__(self, in_channels, out_channels, cfg):
         super(Decoder, self).__init__()
 
         self.conv1 = torch.nn.Conv1d(in_channels=in_channels, out_channels=2 * in_channels,
-                                     kernel_size=1, stride=1)
+                                     kernel_size=cfg['conv1']['kernel_size'],
+                                     stride=cfg['conv1']['stride'])
         self.glu = torch.nn.GLU(dim=-2)
         self.conv2 = torch.nn.ConvTranspose1d(in_channels=in_channels, out_channels=out_channels,
-                                              kernel_size=8, stride=2)
+                                              kernel_size=cfg['conv2']['kernel_size'],
+                                              stride=cfg['conv2']['kernel_size'])
         self.relu = torch.nn.ReLU()
 
     def forward(self, x):
@@ -38,20 +44,21 @@ class Decoder(torch.nn.Module):
 
 
 class Demucs(torch.nn.Module):
-    def __init__(self, H):
+    def __init__(self, cfg):
         super(Demucs, self).__init__()
+        H = cfg['H']
 
-        self.encoder1 = Encoder(in_channels=1, out_channels=H)
-        self.encoder2 = Encoder(in_channels=H, out_channels=2*H)
-        self.encoder3 = Encoder(in_channels=2*H, out_channels=4*H)
+        self.encoder1 = Encoder(in_channels=1, out_channels=H, cfg=cfg['encoder'])
+        self.encoder2 = Encoder(in_channels=H, out_channels=2*H, cfg=cfg['encoder'])
+        self.encoder3 = Encoder(in_channels=2*H, out_channels=4*H, cfg=cfg['encoder'])
 
         self.lstm = torch.nn.LSTM(
                                   input_size=4*H,
                                   hidden_size=4*H, num_layers=2, batch_first=True)
 
-        self.decoder1 = Decoder(in_channels=4*H, out_channels=2*H)
-        self.decoder2 = Decoder(in_channels=2*H, out_channels=H)
-        self.decoder3 = Decoder(in_channels=H, out_channels=1)
+        self.decoder1 = Decoder(in_channels=4*H, out_channels=2*H, cfg=cfg['decoder'])
+        self.decoder2 = Decoder(in_channels=2*H, out_channels=H, cfg=cfg['decoder'])
+        self.decoder3 = Decoder(in_channels=H, out_channels=1, cfg=cfg['decoder'])
 
     def forward(self, x):
         out1 = self.encoder1(x)

@@ -1,0 +1,15 @@
+defaults:
+  - dataset: valentini
+  - model: demucs
+  - loss: mse
+  - optimizer: sgd
+
+
+dataloader:
+  max_seconds: 2
+  sample_rate: 16000
+  batch_size: 12
+
+
+augmentations:
+  - random_crop
