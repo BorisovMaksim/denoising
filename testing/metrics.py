@@ -12,7 +12,7 @@ class Metrics:
         self.snr = SignalNoiseRatio()
         
     def calculate(self, denoised, clean):
-        return {'PESQ': self.nb_pesq(denoised, clean),
-                'STOI': self.stoi(denoised, clean)}
+        return {'PESQ': self.nb_pesq(denoised, clean).item(),
+                'STOI': self.stoi(denoised, clean).item()}
     
 

@@ -34,7 +34,7 @@ class Decoder(torch.nn.Module):
         self.glu = torch.nn.GLU(dim=-2)
         self.conv2 = torch.nn.ConvTranspose1d(in_channels=in_channels, out_channels=out_channels,
                                               kernel_size=cfg['conv2']['kernel_size'],
-                                              stride=cfg['conv2']['kernel_size'])
+                                              stride=cfg['conv2']['stride'])
         self.relu = torch.nn.ReLU()
 
     def forward(self, x):

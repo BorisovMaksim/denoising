@@ -4,12 +4,29 @@ defaults:
   - loss: mse
   - optimizer: sgd
 
+training:
+  num_epochs: 5
+  model_save_path: /media/public/checkpoints
 
 dataloader:
   max_seconds: 2
   sample_rate: 16000
-  batch_size: 12
+  train_batch_size: 12
+  valid_batch_size: 12
+
+validation:
+  path: /media/public/datasets/denoising/DS_10283_2791/noisy_testset_wav
+  wavs:
+    easy: p232_284.wav
+    medium: p232_071.wav
+    hard : p257_171.wav
 
 
-augmentations:
-  - random_crop
+wandb:
+  project: denoising
+  log_interval: 100
+  api_key: local-e23d01ece807cb31e69b2cf4137e4998e4b9856f
+  host: http://localhost:8080/
+  notes: "Experiment note"
+  tags:
+    - baseline

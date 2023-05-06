@@ -14,11 +14,6 @@ def collect_valentini_paths(dataset_path):
     return clean_wavs, noisy_wavs
 
 
-def load_wav(path):
-    wav, org_sr = torchaudio.load(path)
-    wav = torchaudio.functional.resample(wav, orig_freq=org_sr, new_freq=16000)
-    return wav
-
 
 
 def plot_spectrogram(stft, title="Spectrogram", xlim=None):
