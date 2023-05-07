@@ -5,7 +5,7 @@ import torch
 import wandb
 
 class CheckpointSaver:
-    def __init__(self, dirpath, decreasing=True, top_n=5):
+    def __init__(self, dirpath, run_name='', decreasing=True, top_n=5):
         """
         dirpath: Directory path where to store all model weights
         decreasing: If decreasing is `True`, then lower metric is better
@@ -17,9 +17,10 @@ class CheckpointSaver:
         self.decreasing = decreasing
         self.top_model_paths = []
         self.best_metric_val = np.Inf if decreasing else -np.Inf
+        self.run_name = run_name
 
     def __call__(self, model, epoch, metric_val):
-        model_path = os.path.join(self.dirpath, model.__class__.__name__ + f'_epoch{epoch}.pt')
+        model_path = os.path.join(self.dirpath, self.run_name, model.__class__.__name__ + f'_epoch{epoch}.pt')
         save = metric_val < self.best_metric_val if self.decreasing else metric_val > self.best_metric_val
         if save:
             logging.info(

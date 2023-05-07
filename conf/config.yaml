@@ -16,10 +16,7 @@ dataloader:
 
 validation:
   path: /media/public/datasets/denoising/DS_10283_2791/noisy_testset_wav
-  wavs:
-    easy: p232_284.wav
-    medium: p232_071.wav
-    hard : p257_171.wav
+  sample_rate: 48000
 
 
 wandb:

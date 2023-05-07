@@ -36,6 +36,7 @@ class Valentini(Dataset):
         if self.transform:
             random_seed = 0 if self.valid else torch.randint(HIGH_RANDOM_SEED, (1,))[0]
             torch.manual_seed(random_seed)
+
             noisy_wav = self.transform(noisy_wav)
             torch.manual_seed(random_seed)
             clean_wav = self.transform(clean_wav)
