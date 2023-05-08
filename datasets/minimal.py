@@ -18,7 +18,6 @@ class Minimal(Dataset):
         return len(self.wavs)
 
     def __getitem__(self, idx):
-        wav, rate = torchaudio.load(self.wavs[idx])
+        wav, rate = torchaudio.load(Path(self.dataset_path) / self.wavs[idx])
         wav = self.resampler(wav)
-        wav = torch.reshape(wav, (1, 1, -1))
         return wav, self.target_rate

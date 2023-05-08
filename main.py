@@ -1,6 +1,7 @@
 import hydra
-from omegaconf import DictConfig, OmegaConf
+from omegaconf import DictConfig
 from train import train
+
 
 
 @hydra.main(version_base=None, config_path="conf", config_name="config")

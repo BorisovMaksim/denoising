@@ -12,6 +12,8 @@
 import torch
 import torch.nn.functional as F
 
+# device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+
 """STFT-based Loss modules."""
 
 
@@ -26,7 +28,8 @@ def stft(x, fft_size, hop_size, win_length, window):
     Returns:
         Tensor: Magnitude spectrogram (B, #frames, fft_size // 2 + 1).
     """
-    x_stft = torch.stft(x, fft_size, hop_size, win_length, window)
+    x_stft = torch.stft(x[:, 0, :], fft_size, hop_size, win_length, window, return_complex=True)
+    x_stft = torch.view_as_real(x_stft)
     real = x_stft[..., 0]
     imag = x_stft[..., 1]
 
@@ -154,7 +157,7 @@ class L1_Multi_STFT(torch.nn.Module):
         """Initialize STFT loss module."""
         super(L1_Multi_STFT, self).__init__()
         self.multi_STFT_loss = MultiResolutionSTFTLoss()
-        self.l1_loss =  torch.nn.L1Loss()
+        self.l1_loss = torch.nn.L1Loss()
 
     def forward(self, x, y):
         """Calculate forward propagation.
@@ -173,10 +176,10 @@ class L1_Multi_STFT(torch.nn.Module):
 LOSSES = {
     'mse': torch.nn.MSELoss(),
     'L1': torch.nn.L1Loss(),
-    'Multi_STFT': MultiResolutionSTFTLoss,
-    'L1_Multi_STFT': L1_Multi_STFT
+    'Multi_STFT': MultiResolutionSTFTLoss(),
+    'L1_Multi_STFT': L1_Multi_STFT()
 }
 
 
-def get_loss(loss_config):
-    return LOSSES[loss_config['name']]
+def get_loss(loss_config, device):
+    return LOSSES[loss_config['name']].to(device)

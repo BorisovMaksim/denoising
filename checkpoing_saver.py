@@ -19,14 +19,21 @@ class CheckpointSaver:
         self.best_metric_val = np.Inf if decreasing else -np.Inf
         self.run_name = run_name
 
-    def __call__(self, model, epoch, metric_val):
-        model_path = os.path.join(self.dirpath, self.run_name, model.__class__.__name__ + f'_epoch{epoch}.pt')
+
+    def __call__(self, model, epoch, metric_val, optimizer, loss):
+        model_path = os.path.join(self.dirpath, model.__class__.__name__ + f'_{self.run_name}_epoch{epoch}.pt')
         save = metric_val < self.best_metric_val if self.decreasing else metric_val > self.best_metric_val
         if save:
             logging.info(
                 f"Current metric value better than {metric_val} better than best {self.best_metric_val}, saving model at {model_path}, & logging model weights to W&B.")
             self.best_metric_val = metric_val
-            torch.save(model.state_dict(), model_path)
+            torch.save(
+                {  # Save our checkpoint loc
+                    'epoch': epoch,
+                    'model_state_dict': model.state_dict(),
+                    'optimizer_state_dict': optimizer.state_dict(),
+                    'loss': loss,
+                }, model_path)
             self.log_artifact(f'model-ckpt-epoch-{epoch}.pt', model_path, metric_val)
             self.top_model_paths.append({'path': model_path, 'score': metric_val})
             self.top_model_paths = sorted(self.top_model_paths, key=lambda o: o['score'], reverse=not self.decreasing)

@@ -13,24 +13,24 @@ from datasets import get_datasets
 from testing.metrics import Metrics
 from datasets.minimal import Minimal
 
-os.environ['CUDA_VISIBLE_DEVICES'] = "1"
-device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-
 
 def train(cfg: DictConfig):
+    device = torch.device(f'cuda:{cfg.gpu}' if torch.cuda.is_available() else 'cpu')
+
     wandb.login(key=cfg['wandb']['api_key'], host=cfg['wandb']['host'])
     wandb.init(project=cfg['wandb']['project'],
                notes=cfg['wandb']['notes'],
                tags=cfg['wandb']['tags'],
                config=omegaconf.OmegaConf.to_container(
         cfg, resolve=True, throw_on_missing=True))
+    wandb.run.name = cfg['wandb']['run_name']
 
     checkpoint_saver = CheckpointSaver(dirpath=cfg['training']['model_save_path'], run_name=wandb.run.name)
     metrics = Metrics(rate=cfg['dataloader']['sample_rate'])
 
     model = get_model(cfg['model']).to(device)
     optimizer = get_optimizer(model.parameters(), cfg['optimizer'])
-    loss_fn = get_loss(cfg['loss'])
+    loss_fn = get_loss(cfg['loss'], device)
     train_dataset, valid_dataset = get_datasets(cfg)
     minimal_dataset = Minimal(cfg)
 
@@ -70,12 +70,13 @@ def train(cfg: DictConfig):
                 running_stoi += running_metrics['STOI']
 
                 if phase == 'train' and i % cfg['wandb']['log_interval'] == 0:
-                    wandb.log({"train_loss": running_loss / (i + 1),
-                               "train_pesq": running_pesq / (i + 1),
-                               "train_stoi": running_stoi / (i + 1)})
-            epoch_loss = running_loss / len(dataloaders[phase])
-            eposh_pesq = running_pesq / len(dataloaders[phase])
-            eposh_stoi = running_stoi / len(dataloaders[phase])
+                    wandb.log({"train_loss": running_loss / (i + 1) / inputs.size(0),
+                               "train_pesq": running_pesq / (i + 1) / inputs.size(0),
+                               "train_stoi": running_stoi / (i + 1) / inputs.size(0)})
+
+            epoch_loss = running_loss / len(dataloaders[phase].dataset)
+            eposh_pesq = running_pesq / len(dataloaders[phase].dataset)
+            eposh_stoi = running_stoi / len(dataloaders[phase].dataset)
 
             wandb.log({f"{phase}_loss": epoch_loss,
                        f"{phase}_pesq": eposh_pesq,
@@ -83,10 +84,15 @@ def train(cfg: DictConfig):
 
             if phase == 'val':
                 for i, (wav, rate) in enumerate(dataloaders['minimal']):
-                    prediction = model(wav)
+                    prediction = model(wav.to(device))
                     wandb.log({
                         f"{i}_example": wandb.Audio(
-                            prediction.cpu()[0][0],
+                            prediction.detach().cpu().numpy()[0][0],
                             sample_rate=rate)})
 
-                checkpoint_saver(model, epoch, metric_val=eposh_pesq)
+                checkpoint_saver(model, epoch, metric_val=eposh_pesq,
+                                 optimizer=optimizer, loss=epoch_loss)
+
+
+if __name__ == "__main__":
+    pass
