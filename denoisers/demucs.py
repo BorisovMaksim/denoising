@@ -83,3 +83,8 @@ class Demucs(torch.nn.Module):
             x = decoder(x + outs[i])
         x = pad_cut_batch_audio(x, model_input.shape)
         return x
+
+    def predict(self, wav):
+        prediction = self.forward(torch.reshape(wav, (1, 1, -1)))
+        return prediction.detach()[0]
+
