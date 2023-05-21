@@ -1,5 +1,6 @@
 demucs:
  H: 64
+ L: 3
  encoder:
    conv1:
      kernel_size: 8

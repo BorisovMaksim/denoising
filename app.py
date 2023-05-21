@@ -24,15 +24,13 @@ def denoising_transform(audio):
     )
     model.predict(audio, tgt_path)
     return tgt_path
-    # model.predict(src_path, tgt_path)
-    # return tgt_path
+
 
 
 inputs = gr.inputs.Audio(label="Source Audio", source="microphone", type='filepath')
 outputs = gr.outputs.Audio(label="Target Audio", type='filepath')
 
 title = "Denoising"
-#"""
 gr.Interface(
     denoising_transform, inputs, outputs, title=title,
     allow_flagging='never'
@@ -40,6 +38,4 @@ gr.Interface(
     server_name='localhost',
     server_port=7871,
     share=True
-    #ssl_keyfile='example.key',
-    #ssl_certfile="example.crt",
 )

@@ -1,11 +1,11 @@
 defaults:
   - dataset: valentini
   - model: demucs
-  - loss: mse
+  - loss: L1_Multi_STFT
   - optimizer: sgd
 
 training:
-  num_epochs: 5
+  num_epochs: 10
   model_save_path: /media/public/checkpoints
 
 dataloader:
@@ -13,6 +13,8 @@ dataloader:
   sample_rate: 16000
   train_batch_size: 12
   valid_batch_size: 12
+  normalize: False
+  num_workers: 12
 
 validation:
   path: /media/public/datasets/denoising/DS_10283_2791/noisy_testset_wav
@@ -20,13 +22,13 @@ validation:
 
 
 wandb:
+  entity: borisovmaksim
   run_name: default
   project: denoising
   log_interval: 100
   api_key: local-e23d01ece807cb31e69b2cf4137e4998e4b9856f
   host: http://localhost:8080/
   notes: "Experiment note"
-  tags:
-    - baseline
+  resume: False
 
-gpu: 0
+gpu: 1
