@@ -15,7 +15,7 @@ import torch
 def run_app(cfg: DictConfig):
     model = Demucs(cfg['model']['demucs'])
     model_path = hf_hub_download(repo_id="BorisovMaksim/demucs", filename="Demucs_original_sr_epoch3.pt")
-    checkpoint = torch.load(model_path)
+    checkpoint = torch.load(model_path, map_location=torch.device('cpu'))
     model.load_state_dict(checkpoint['model_state_dict'])
 
     def denoising_transform(audio):
