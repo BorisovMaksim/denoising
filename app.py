@@ -4,7 +4,7 @@ import gradio as gr
 from pathlib import Path
 from denoisers.SpectralGating import SpectralGating
 
-
+model = SpectralGating()
 
 def denoising_transform(audio):
     src_path = Path(__file__).parent.resolve() / Path("cache_wav/original/{}.wav".format(str(uuid.uuid4())))
@@ -32,6 +32,5 @@ demo = gr.Interface(
 )
 
 if __name__ == "__main__":
-    model = SpectralGating()
     demo.launch()
 

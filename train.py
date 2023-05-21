@@ -34,7 +34,8 @@ def init_wandb(cfg):
 def train(cfg: DictConfig):
     device = torch.device(f'cuda:{cfg.gpu}' if torch.cuda.is_available() else 'cpu')
     init_wandb(cfg)
-    checkpoint_saver = CheckpointSaver(dirpath=cfg['training']['model_save_path'], run_name=wandb.run.name)
+    checkpoint_saver = CheckpointSaver(dirpath=cfg['training']['model_save_path'], run_name=wandb.run.name,
+                                       decreasing=False)
     metrics = Metrics(source_rate=cfg['dataloader']['sample_rate']).to(device)
 
     model = get_model(cfg['model']).to(device)
