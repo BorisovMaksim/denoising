@@ -13,7 +13,7 @@ import torch
 
 @hydra.main(version_base=None, config_path="conf", config_name="config")
 def run_app(cfg: DictConfig):
-    model = Demucs(cfg['model'])
+    model = Demucs(cfg['model']['demucs'])
     model_path = hf_hub_download(repo_id="BorisovMaksim/demucs", filename="Demucs_original_sr_epoch3.pt")
     checkpoint = torch.load(model_path)
     model.load_state_dict(checkpoint['model_state_dict'])
