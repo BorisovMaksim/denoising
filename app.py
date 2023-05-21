@@ -6,8 +6,10 @@ from denoisers.SpectralGating import SpectralGating
 
 
 def denoising_transform(audio):
-    src_path = "cache_wav/original/{}.wav".format(str(uuid.uuid4()))
-    tgt_path = "cache_wav/denoised/{}.wav".format(str(uuid.uuid4()))
+    src_path = Path("cache_wav/original/{}.wav".format(str(uuid.uuid4())))
+    tgt_path = Path("cache_wav/denoised/{}.wav".format(str(uuid.uuid4())))
+    src_path.parent.mkdir(exist_ok=True)
+    tgt_path.parent.mkdir(exist_ok=True)
     (ffmpeg.input(audio)
             .output(src_path, acodec='pcm_s16le', ac=1, ar=22050)
             .run()
