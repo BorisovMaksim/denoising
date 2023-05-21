@@ -12,7 +12,7 @@ def denoising_transform(audio):
     src_path.parent.mkdir(exist_ok=True, parents=True)
     tgt_path.parent.mkdir(exist_ok=True, parents=True)
     (ffmpeg.input(audio)
-            .output(src_path, acodec='pcm_s16le', ac=1, ar=22050)
+            .output(src_path.as_posix(), acodec='pcm_s16le', ac=1, ar=22050)
             .run()
     )
     model.predict(audio, tgt_path)
