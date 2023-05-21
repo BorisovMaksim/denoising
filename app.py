@@ -1,12 +1,8 @@
 import uuid
 import ffmpeg
 import gradio as gr
-
-
-
+from pathlib import Path
 from denoisers.SpectralGating import SpectralGating
-
-model = SpectralGating()
 
 
 def denoising_transform(audio):
@@ -20,15 +16,19 @@ def denoising_transform(audio):
     return tgt_path
 
 
-
-inputs = gr.inputs.Audio(label="Source Audio", source="microphone", type='filepath')
-outputs = gr.outputs.Audio(label="Target Audio", type='filepath')
-
-title = "Denoising"
-gr.Interface(
-    denoising_transform, inputs, outputs, title=title,
-    allow_flagging='never'
-).launch(
-    # server_name='localhost',
-    # server_port=7871
+demo = gr.Interface(
+    fn=denoising_transform,
+    inputs=gr.Audio(label="Source Audio", source="microphone", type='filepath'),
+    outputs=gr.Audio(label="Target Audio", type='filepath'),
+    examples=[
+        ["testing/wavs/p232_071.wav"],
+        ["testing/wavs/p232_284.wav"],
+    ],
+    title="Denoising",
+    interpretation="default",
 )
+
+if __name__ == "__main__":
+    model = SpectralGating()
+    demo.launch()
+
