@@ -2,5 +2,5 @@ ffmpeg-python
 noisereduce
 torch
 torchaudio
-hydra
+hydra-core
 omegaconf
