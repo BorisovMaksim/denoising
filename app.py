@@ -29,7 +29,6 @@ gr.Interface(
     denoising_transform, inputs, outputs, title=title,
     allow_flagging='never'
 ).launch(
-    server_name='localhost',
-    server_port=7871,
-    share=True
+    # server_name='localhost',
+    # server_port=7871
 )
