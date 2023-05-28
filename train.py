@@ -87,7 +87,7 @@ def train(cfg: DictConfig):
                                  pesq=running_pesq / (i + 1) / inputs.size(0),
                                  stoi=running_stoi / (i + 1) / inputs.size(0))
 
-                if phase == 'train' and i % cfg['wandb']['log_interval'] == 0:
+                if phase == 'train' and i % cfg['wandb']['log_interval'] == cfg['wandb']['log_interval'] - 1:
                     wandb.log({"train_loss": running_loss / (i + 1) / inputs.size(0),
                                "train_pesq": running_pesq / (i + 1) / inputs.size(0),
                                "train_stoi": running_stoi / (i + 1) / inputs.size(0)})
