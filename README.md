@@ -35,7 +35,7 @@ The PESQ metric is used for estimating overall speech quality after denoising an
 Intelligibility measure is highly correlated with the intelligibility of degraded speech signals
 
 # Experiments
-For tracking experiments local server of [Weights & Biases](https://wandb.ai/site) is used. To manage configs for different experiments [hydra](https://hydra.cc/) is used. It allows an east way to track configs and override paramaters.  
+For tracking experiments local server of [Weights & Biases](https://wandb.ai/site) is used. To manage configs for different experiments [hydra](https://hydra.cc/) is used. It allows an easy way to track configs and override paramaters.  
 
 
 | Experiment | Description | Result                                                 |
