@@ -31,7 +31,9 @@ where T is the time points in the waveform.
 -  Perceptual Evaluation of Speech Quality ([PESQ](https://torchmetrics.readthedocs.io/en/stable/audio/perceptual_evaluation_speech_quality.html))
 - Short-Time Objective Intelligibility ([STOI](https://torchmetrics.readthedocs.io/en/stable/audio/short_time_objective_intelligibility.html))
 
-Intelligibility measure which is highly correlated with the intelligibility of degraded speech signals
+The PESQ metric is used for estimating overall speech quality after denoising and STOI is used for estimating speech intelligibility after denoising.
+Intelligibility measure is highly correlated with the intelligibility of degraded speech signals
+
 # Experiments
 For tracking experiments local server of [Weights & Biases](https://wandb.ai/site) is used. To manage configs for different experiments [hydra](https://hydra.cc/) is used. It allows an east way to track configs and override paramaters.  
 
