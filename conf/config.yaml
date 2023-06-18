@@ -17,7 +17,7 @@ dataloader:
   num_workers: 12
 
 validation:
-  path: /media/public/datasets/denoising/DS_10283_2791/minimal
+  path: /media/public/data/denoising/DS_10283_2791/minimal
   sample_rate: 48000
 
 

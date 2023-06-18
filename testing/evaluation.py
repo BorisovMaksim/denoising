@@ -3,10 +3,9 @@ import os
 
 from tqdm import tqdm
 
-from utils import collect_valentini_paths
+from utils.utils import collect_valentini_paths
 from metrics import Metrics
 from denoisers.SpectralGating import SpectralGating
-from denoisers.demucs import Demucs
 import torch
 import torchaudio
 import yaml
@@ -62,7 +61,7 @@ def evaluate_on_dataset(model_name, dataset_path, dataset_type, model_path):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(prog='Program to evaluate denoising')
     parser.add_argument('--dataset_path', type=str,
-                        default='/media/public/datasets/denoising/DS_10283_2791/',
+                        default='/media/public/data/denoising/DS_10283_2791/',
                         help='Path to dataset folder')
     parser.add_argument('--dataset_type', type=str, required=True,
                         choices=['valentini'])

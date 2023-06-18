@@ -1,8 +1,8 @@
 from typing import Tuple
 from torch.utils.data import Dataset
 
-from datasets.valentini import Valentini
-from transforms import Transform
+from data.datasets.valentini import Valentini
+from data.transforms import Transform
 
 DATASETS_POOL = {
     'valentini': Valentini

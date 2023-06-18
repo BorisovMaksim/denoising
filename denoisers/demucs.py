@@ -1,6 +1,6 @@
 import torch
 from torch.nn.functional import pad
-from utils import pad_cut_batch_audio
+from utils.utils import pad_cut_batch_audio
 import torch.nn as nn
 
 

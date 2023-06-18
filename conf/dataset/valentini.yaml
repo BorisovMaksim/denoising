@@ -1,4 +1,4 @@
 valentini:
- dataset_path: /media/public/datasets/denoising/DS_10283_2791/
+ dataset_path: /media/public/data/denoising/DS_10283_2791/
  val_fraction: 0.2
  sample_rate:  48000
