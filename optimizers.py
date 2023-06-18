@@ -2,6 +2,7 @@ import torch
 
 OPTIMIZERS_POOL = {
     'sgd': torch.optim.SGD,
+    'adam': torch.optim.Adam
 }
 
 def get_optimizer(model_params, optimizer_config):

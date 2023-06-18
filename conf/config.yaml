@@ -17,7 +17,7 @@ dataloader:
   num_workers: 12
 
 validation:
-  path: /media/public/datasets/denoising/DS_10283_2791/noisy_testset_wav
+  path: /media/public/datasets/denoising/DS_10283_2791/minimal
   sample_rate: 48000
 
 
@@ -30,5 +30,6 @@ wandb:
   host: http://localhost:8080/
   notes: "Experiment note"
   resume: False
+  resume_path: None
 
 gpu: 1

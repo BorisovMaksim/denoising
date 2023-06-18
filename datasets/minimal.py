@@ -8,7 +8,7 @@ from torchaudio.transforms import Resample
 
 class Minimal(Dataset):
     def __init__(self, cfg):
-        self.wavs = ['p232_284.wav', 'p232_071.wav', 'p257_171.wav']
+        self.wavs = ['p232_284.wav', 'p232_071.wav', 'p257_171.wav', 'from_train.wav']
         self.dataset_path = cfg['validation']['path']
         self.target_rate = cfg['dataloader']['sample_rate']
         self.resampler = Resample(orig_freq=cfg['validation']['sample_rate'],

@@ -4,6 +4,7 @@ from torch.utils.data import DataLoader
 import omegaconf
 from omegaconf import DictConfig
 import wandb
+from torch.optim.lr_scheduler import ExponentialLR
 
 from checkpoing_saver import CheckpointSaver
 from denoisers import get_model
@@ -13,34 +14,26 @@ from datasets import get_datasets
 from testing.metrics import Metrics
 from datasets.minimal import Minimal
 from tqdm import tqdm
+from pathlib import Path
 
-def init_wandb(cfg):
+
+def train(cfg: DictConfig):
+    device = torch.device(f'cuda:{cfg.gpu}' if torch.cuda.is_available() else 'cpu')
     wandb.login(key=cfg['wandb']['api_key'], host=cfg['wandb']['host'])
     wandb.init(project=cfg['wandb']['project'],
                notes=cfg['wandb']['notes'],
                config=omegaconf.OmegaConf.to_container(cfg, resolve=True, throw_on_missing=True),
                resume=cfg['wandb']['resume'],
                name=cfg['wandb']['run_name'])
-    if wandb.run.resumed:
-        api = wandb.Api()
-        runs = api.runs(f"{cfg['wandb']['entity']}/{cfg['wandb']['project']}",
-                        order='train_pesq')
-        run = [run for run in runs if run.name == cfg['wandb']['run_name'] and run.state != 'running'][0]
-        artifacts = run.logged_artifacts()
-        best_model = [artifact for artifact in artifacts if artifact.type == 'model'][0]
-
-        best_model.download()
-
-def train(cfg: DictConfig):
-    device = torch.device(f'cuda:{cfg.gpu}' if torch.cuda.is_available() else 'cpu')
-    init_wandb(cfg)
     checkpoint_saver = CheckpointSaver(dirpath=cfg['training']['model_save_path'], run_name=wandb.run.name,
                                        decreasing=False)
     metrics = Metrics(source_rate=cfg['dataloader']['sample_rate']).to(device)
 
     model = get_model(cfg['model']).to(device)
     optimizer = get_optimizer(model.parameters(), cfg['optimizer'])
+    scheduler = ExponentialLR(optimizer, gamma=0.9)
     loss_fn = get_loss(cfg['loss'], device)
+
     train_dataset, valid_dataset = get_datasets(cfg)
     minimal_dataset = Minimal(cfg)
 
@@ -54,6 +47,16 @@ def train(cfg: DictConfig):
 
     wandb.watch(model, log_freq=cfg['wandb']['log_interval'])
     epoch = 0
+
+    if cfg['wandb']['resume_path'] is not None:
+        checkpoint = torch.load(cfg['wandb']['resume_path'])
+        model.load_state_dict(checkpoint['model_state_dict'])
+        optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
+        epoch = checkpoint['epoch']
+        loss = checkpoint['loss']
+        print(f"Continue from {cfg['wandb']['resume_path']}, epoch={epoch}, loss={loss}")
+
+
     while epoch < cfg['training']['num_epochs']:
         for phase in ['train', 'val']:
             if phase == 'train':
@@ -103,10 +106,10 @@ def train(cfg: DictConfig):
             if phase == 'val':
                 for i, (wav, rate) in enumerate(dataloaders['minimal']):
                     if cfg['dataloader']['normalize']:
-                        std = torch.std(wav)
-                        wav = wav / std
+                        scale = torch.std(wav)
+                        wav = wav / scale
                         prediction = model(wav.to(device))
-                        prediction = prediction * std
+                        prediction = prediction * scale
                     else:
                         prediction = model(wav.to(device))
                     wandb.log({
@@ -116,6 +119,8 @@ def train(cfg: DictConfig):
 
                 checkpoint_saver(model, epoch, metric_val=eposh_pesq,
                                  optimizer=optimizer, loss=epoch_loss)
+            else:
+                scheduler.step()
         epoch += 1
 
 

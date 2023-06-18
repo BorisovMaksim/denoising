@@ -110,7 +110,7 @@ class MultiResolutionSTFTLoss(torch.nn.Module):
                  fft_sizes=(1024, 2048, 512),
                  hop_sizes=(120, 240, 50),
                  win_lengths=(600, 1200, 240),
-                 window="hann_window", factor_sc=0.1, factor_mag=0.1):
+                 window="hann_window", factor_sc=0.5, factor_mag=0.5):
         """Initialize Multi resolution STFT loss module.
         Args:
             fft_sizes (list): List of FFT sizes.
@@ -145,19 +145,18 @@ class MultiResolutionSTFTLoss(torch.nn.Module):
         sc_loss /= len(self.stft_losses)
         mag_loss /= len(self.stft_losses)
 
-        return self.factor_sc*sc_loss, self.factor_mag*mag_loss
-
-
+        return self.factor_sc * sc_loss, self.factor_mag * mag_loss
 
 
 class L1_Multi_STFT(torch.nn.Module):
     """STFT loss module."""
 
-    def __init__(self):
+    def __init__(self, loss_config):
         """Initialize STFT loss module."""
         super(L1_Multi_STFT, self).__init__()
         self.multi_STFT_loss = MultiResolutionSTFTLoss()
         self.l1_loss = torch.nn.L1Loss()
+        self.loss_config = loss_config
 
     def forward(self, x, y):
         """Calculate forward propagation.
@@ -173,13 +172,63 @@ class L1_Multi_STFT(torch.nn.Module):
         return sc_loss + mag_loss + l1_loss
 
 
+class L1_STFT(torch.nn.Module):
+    """STFT loss module."""
+
+    def __init__(self, loss_config):
+        """Initialize STFT loss module."""
+        super(L1_STFT, self).__init__()
+        self.STFT_loss = STFTLoss()
+        self.l1_loss = torch.nn.L1Loss()
+        self.STFT_weight = loss_config['STFT_weight']
+
+    def forward(self, x, y):
+        """Calculate forward propagation.
+        Args:
+            x (Tensor): Predicted signal (B, T).
+            y (Tensor): Groundtruth signal (B, T).
+        Returns:
+            Tensor: Spectral convergence loss value.
+            Tensor: Log STFT magnitude loss value.
+        """
+        sc_loss, mag_loss = self.STFT_loss(x, y)
+        l1_loss = self.l1_loss(x, y)
+        return self.STFT_weight * (sc_loss + mag_loss) + l1_loss
+
+
+class L2_STFT(torch.nn.Module):
+    """STFT loss module."""
+
+    def __init__(self, loss_config):
+        """Initialize STFT loss module."""
+        super(L2_STFT, self).__init__()
+        self.STFT_loss = STFTLoss()
+        self.l2_loss = torch.nn.MSELoss()
+        self.STFT_weight = loss_config['STFT_weight']
+
+    def forward(self, x, y):
+        """Calculate forward propagation.
+        Args:
+            x (Tensor): Predicted signal (B, T).
+            y (Tensor): Groundtruth signal (B, T).
+        Returns:
+            Tensor: Spectral convergence loss value.
+            Tensor: Log STFT magnitude loss value.
+        """
+        sc_loss, mag_loss = self.STFT_loss(x, y)
+        l2_loss = self.l2_loss(x, y)
+        return self.STFT_weight * (sc_loss + mag_loss) + l2_loss
+
+
 LOSSES = {
     'mse': torch.nn.MSELoss(),
     'L1': torch.nn.L1Loss(),
     'Multi_STFT': MultiResolutionSTFTLoss(),
-    'L1_Multi_STFT': L1_Multi_STFT()
+    'L1_Multi_STFT': L1_Multi_STFT,
+    'L1_STFT': L1_STFT,
+    'L2_STFT': L2_STFT
 }
 
 
 def get_loss(loss_config, device):
-    return LOSSES[loss_config['name']].to(device)
+    return LOSSES[loss_config['name']](loss_config).to(device)

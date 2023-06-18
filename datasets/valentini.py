@@ -3,7 +3,11 @@ from torch.utils.data import Dataset
 from pathlib import Path
 import torchaudio
 
+
+
 MAX_RANDOM_SEED = 1000
+
+
 
 class Valentini(Dataset):
     def __init__(self, dataset_path, val_fraction, transform=None, valid=False, *args, **kwargs):
@@ -30,13 +34,14 @@ class Valentini(Dataset):
     def __getitem__(self, idx):
         noisy_wav, noisy_sr = torchaudio.load(self.noisy_wavs[idx])
         clean_wav, clean_sr = torchaudio.load(self.clean_wavs[idx])
+        
+        
+        random_seed = 0 if self.valid else torch.randint(MAX_RANDOM_SEED, (1,))[0]
+        torch.manual_seed(random_seed) 
 
         if self.transform:
-            random_seed = 0 if self.valid else torch.randint(MAX_RANDOM_SEED, (1,))[0]
-            torch.manual_seed(random_seed)
-            noisy_wav = self.transform(noisy_wav)
-            torch.manual_seed(random_seed)
-            clean_wav = self.transform(clean_wav)
+            clean_wav, noisy_wav = self.transform(clean_wav, noisy_wav)
+
         return noisy_wav, clean_wav
 
 

@@ -1,5 +1,9 @@
-.idea/**
-.ipynb_checkpoints/**
+**/.idea
+**/.ipynb_checkpoints
 nohup.out
-__pycache__/**
+**/__pycache__
 cache_wav/
+outputs/
+wandb/
+artifacts/
+
