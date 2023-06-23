@@ -8,8 +8,19 @@ sdk_version: 3.28.1
 app_file: app.py
 pinned: false
 ---
-This is a repo that implements DEMUCS model proposed in [Real Time Speech Enhancement in the Waveform Domain](https://arxiv.org/abs/2006.12847) from scratch in Pytorch. The proposed model is based on an encoder-decoder architecture with skip-connections. It is optimized on both time and frequency domains, using multiple loss functions.
-The demo for this project is available at [hugging face](https://huggingface.co/spaces/BorisovMaksim/denoising). You can record your voice in noisy conditions and get denoised version using DEMUCS model. 
+This is a repo that implements DEMUCS model proposed in [Real Time Speech Enhancement in the Waveform Domain](https://arxiv.org/abs/2006.12847) from scratch in Pytorch. The proposed model is based on an encoder-decoder architecture with skip-connections. It is optimized on both time and frequency domains, using multiple loss functions. 
+The web interface for this project is available at [hugging face](https://huggingface.co/spaces/BorisovMaksim/denoising). You can record your voice in noisy conditions and get denoised version using DEMUCS model. 
+
+
+<p align="center">
+  <img src="https://th.bing.com/th/id/OIP.JuP5GDiGXTGkVR-x7Ov0bgHaF8?w=233&h=186&c=7&r=0&o=5&dpr=2&pid=1.7" >
+</p>
+
+
+# Potential usages
+- Real time denoising in communication systems (such as skype)
+- Improving speech assistants (ASR part)
+
 
 # Data
 In the scope of this project [Valentini](https://datashare.ed.ac.uk/handle/10283/2791) dataset in used. It is clean and noisy parallel speech database. The database was designed to train and test speech enhancement methods that operate at 48kHz. There are 56 speakers and ~10 gb of speech data.
@@ -38,6 +49,7 @@ Intelligibility measure is highly correlated with the intelligibility of degrade
 For tracking experiments local server of [Weights & Biases](https://wandb.ai/site) is used. To manage configs for different experiments [hydra](https://hydra.cc/) is used. It allows an easy way to track configs and override paramaters.  
 
 
+
 | Experiment | Description | Result                                                 |
 |--------------|:-----:|--------------------------------------------------------|
 | Baseline | Initial experiment with L1 loss  | Poor quality                                           |
@@ -47,15 +59,39 @@ For tracking experiments local server of [Weights & Biases](https://wandb.ai/sit
 |wav_normalization | Tried to normalized wav by std during training| Small improvement                                      |
 | original_sr| Train with original sample rate | Significant improvement                                |
 |increased_L | Increased number of encoder-decoder pairs from 3 to 5| Performance comparable with original_sr                |
-| double_sr| Train with double sample rate| in progress                                            | 
+| double_sr| Train with double sample rate| Small improvement                                            | 
+|replicate paper | Lower learning rate and fix bug in dataloader | Massive improvement! |  
 
-![img.png](images/img.png)
+                                    
+
+![img.png](images/plot.png)
+## Final model
+
+<pre><code> H: 64
+ L: 5
+ encoder:
+   conv1:
+     kernel_size: 8
+     stride: 2
+   conv2:
+     kernel_size: 1
+     stride: 1
+
+ decoder:
+   conv1:
+     kernel_size: 1
+     stride: 1
+   conv2:
+     kernel_size: 8
+     stride: 2
+</code></pre>
 
 
 
 # Testing
 |                 | valentini_PESQ | valentini_STOI |
 |:---------------:|:--------------:|:--------------:|
-| ideal denoising |     1.9709     |     0.9211     |
 |    Spectral Gating     |     1.7433     |     0.8844     |
+| Demucs |     2.4838     |       0.9192   |
+
 
