@@ -93,5 +93,6 @@ For tracking experiments local server of [Weights & Biases](https://wandb.ai/sit
 |:---------------:|:--------------:|:--------------:|
 |    Spectral Gating     |     1.7433     |     0.8844     |
 | Demucs |     2.4838     |       0.9192   |
+| DEMUCS (facebook)| 3.07|  95 |
 
 
