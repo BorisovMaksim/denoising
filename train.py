@@ -16,6 +16,7 @@ from tqdm import tqdm
 
 
 def train(cfg: DictConfig):
+    # Initialization with parameters from config
     device = torch.device(f'cuda:{cfg.gpu}' if torch.cuda.is_available() else 'cpu')
     wandb.login(key=cfg['wandb']['api_key'], host=cfg['wandb']['host'])
     wandb.init(project=cfg['wandb']['project'],
@@ -45,7 +46,8 @@ def train(cfg: DictConfig):
 
     wandb.watch(model, log_freq=cfg['wandb']['log_interval'])
     epoch = 0
-
+    
+    # Continue training if resume_path is provided
     if cfg['wandb']['resume_path'] is not None:
         checkpoint = torch.load(cfg['wandb']['resume_path'])
         model.load_state_dict(checkpoint['model_state_dict'])
@@ -54,7 +56,7 @@ def train(cfg: DictConfig):
         loss = checkpoint['loss']
         print(f"Continue from {cfg['wandb']['resume_path']}, epoch={epoch}, loss={loss}")
 
-
+    # Training loop
     while epoch < cfg['training']['num_epochs']:
         for phase in ['train', 'val']:
             if phase == 'train':
@@ -78,6 +80,7 @@ def train(cfg: DictConfig):
                         loss.backward()
                         optimizer.step()
 
+                # Collect and log metrics 
                 running_metrics = metrics(denoised=outputs, clean=labels)
                 running_loss += loss.item() * inputs.size(0)
                 running_pesq += running_metrics['PESQ']
@@ -87,7 +90,8 @@ def train(cfg: DictConfig):
                 loop.set_postfix(loss=running_loss / (i + 1) / inputs.size(0),
                                  pesq=running_pesq / (i + 1) / inputs.size(0),
                                  stoi=running_stoi / (i + 1) / inputs.size(0))
-
+                
+                # Log metrics every log_interval iterations during trainig
                 if phase == 'train' and i % cfg['wandb']['log_interval'] == cfg['wandb']['log_interval'] - 1:
                     wandb.log({"train_loss": running_loss / (i + 1) / inputs.size(0),
                                "train_pesq": running_pesq / (i + 1) / inputs.size(0),
@@ -102,6 +106,7 @@ def train(cfg: DictConfig):
                        f"{phase}_stoi": eposh_stoi})
 
             if phase == 'val':
+                # Inference on a few wavs
                 for i, (wav, rate) in enumerate(dataloaders['minimal']):
                     if cfg['dataloader']['normalize']:
                         scale = torch.std(wav)
@@ -110,6 +115,7 @@ def train(cfg: DictConfig):
                         prediction = prediction * scale
                     else:
                         prediction = model(wav.to(device))
+                    # Log audio into wandb to listen during training
                     wandb.log({
                         f"{i}_example": wandb.Audio(
                             prediction.detach().cpu().numpy()[0][0],
